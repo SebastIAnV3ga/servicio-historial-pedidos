@@ -8,7 +8,7 @@ Python 3.8 o superior. No hay dependencias externas.
 
 ## Cómo abrirlo
 - **Windows:** doble clic en `iniciar.bat` (abre `http://127.0.0.1:8012`).
-- **Con git:** `git clone <URL-de-este-repo>` y luego lo de arriba.
+- **Con git:** `git clone <(https://github.com/SebastIAnV3ga/servicio-historial-pedidos.git)>` y luego lo de arriba.
 - **macOS / Linux:** `python3 server.py`
 
 El puerto es **8012** (cambia con la variable `PORT`) para no chocar con otros servicios que usan el 8000.
