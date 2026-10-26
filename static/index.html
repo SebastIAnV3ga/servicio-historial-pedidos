@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Historial de pedidos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EEF1F6;--surface:#fff;--ink:#14182B;--mute:#5B6479;--line:#DCE1EC;--soft:#E4E9F7;--cobalt:#2547C8;--hero:#2547C8;--btn-ink:#fff;--ok:#1F7A55;--warn:#A86C06;--bad:#B8452E;--shadow:0 10px 30px rgba(20,24,43,.12)}
+@media(prefers-color-scheme:dark){:root{--bg:#0F1220;--surface:#171B2E;--ink:#ECEFFA;--mute:#98A1BC;--line:#2A3050;--soft:#222A52;--cobalt:#7C95FF;--hero:#1B2A6B;--btn-ink:#0F1220;--ok:#4FC08D;--warn:#E0A93B;--bad:#F0806A;--shadow:0 10px 30px rgba(0,0,0,.45)}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "DM Sans",system-ui,sans-serif}
+:focus-visible{outline:3px solid var(--cobalt);outline-offset:2px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+.hero{background-color:var(--hero);background-image:radial-gradient(circle at 12px 12px,rgba(255,255,255,.18) 3px,transparent 4px),radial-gradient(circle at 36px 36px,rgba(255,255,255,.10) 7px,transparent 8px);background-size:48px 48px;color:#fff;padding:40px 0 96px}
+.hero :focus-visible{outline-color:#fff}
+.hero .wrap{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
+h1{font:800 clamp(2rem,5vw,3.1rem)/1.05 "Bricolage Grotesque",system-ui,sans-serif;margin:0 0 8px;letter-spacing:-.02em}
+.hero p{margin:0;opacity:.88;max-width:34ch}
+.user{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.15);border-radius:999px;padding:6px 6px 6px 18px;font-weight:500}
+.user input{width:84px;border:0;border-radius:999px;padding:9px 14px;font:inherit;background:#fff;color:#14182B;text-align:center}
+.stats{position:relative;margin-top:-60px;background:var(--surface);border-radius:20px;padding:24px 28px;box-shadow:var(--shadow);display:grid;grid-template-columns:auto 1fr;gap:12px 40px;align-items:center}
+.stats[hidden]{display:none}
+.big{font:800 2.5rem/1 "Bricolage Grotesque",system-ui,sans-serif;letter-spacing:-.02em}
+.stats small{color:var(--mute);display:block;margin-bottom:4px}
+.bar{display:flex;height:14px;border-radius:7px;overflow:hidden;gap:2px;background:var(--line)}
+.bar span{background:var(--c);min-width:6px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;color:var(--mute);font-size:.88rem}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--c);margin-right:6px}
+.tools{display:flex;flex-wrap:wrap;gap:10px;margin:28px 0 14px;align-items:center}
+.search{flex:1 1 240px;position:relative}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--mute)}
+.search input{padding-left:38px;width:100%}
+input,button{font:inherit;color:inherit}
+.tools input{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--ink)}
+.tools label{display:flex;align-items:center;gap:6px;color:var(--mute);font-size:.88rem}
+.btn{background:var(--cobalt);color:var(--btn-ink);border:0;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.6;cursor:wait}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;cursor:pointer;font-weight:500}
+.chip b{color:var(--mute);margin-left:6px;font-weight:500}
+.chip[aria-pressed=true]{background:var(--cobalt);border-color:var(--cobalt);color:var(--btn-ink)}
+.chip[aria-pressed=true] b{color:inherit;opacity:.8}
+.row{display:grid;grid-template-columns:1.1fr 1fr 1.5fr auto 18px;gap:16px;align-items:center;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-bottom:8px;cursor:pointer}
+.row:hover{border-color:var(--cobalt)}
+.row small{display:block;color:var(--mute)}
+.c3{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.c4{font-weight:700;text-align:right}
+.chev{color:var(--mute);display:flex}
+.prog{display:inline-grid;grid-template-columns:repeat(5,16px);gap:3px}
+.prog i{height:5px;border-radius:3px;background:var(--line)}
+.prog i.on{background:var(--c)}
+.prog.x i{background:var(--c);opacity:.3}
+.badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:.82rem;font-weight:700;color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent)}
+.s-pendiente{--c:var(--warn)}.s-pagado{--c:color-mix(in srgb,var(--cobalt) 60%,var(--surface))}.s-en_preparacion{--c:color-mix(in srgb,var(--cobalt) 80%,var(--surface))}.s-enviado{--c:var(--cobalt)}.s-entregado{--c:var(--ok)}.s-cancelado{--c:var(--bad)}.s-devuelto{--c:var(--mute)}
+.pag{display:flex;justify-content:center;align-items:center;gap:14px;margin:18px 0 60px;color:var(--mute)}
+.empty{text-align:center;padding:48px 16px;background:var(--surface);border:1px dashed var(--line);border-radius:14px}
+.empty p{margin:0 0 14px;color:var(--mute)}
+.sk{height:62px;border-radius:12px;margin-bottom:8px;background:linear-gradient(90deg,var(--line),var(--soft),var(--line));background-size:200% 100%;animation:sh 1.2s infinite}
+@keyframes sh{to{background-position:-200% 0}}
+.scrim{position:fixed;inset:0;background:rgba(10,14,30,.55);opacity:0;pointer-events:none;transition:opacity .2s}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(470px,100%);background:var(--surface);transform:translateX(100%);transition:transform .25s;overflow:auto;padding:24px;box-shadow:var(--shadow);visibility:hidden}
+.open .scrim{opacity:1;pointer-events:auto}
+.open .drawer{transform:none;visibility:visible}
+.dh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:22px}
+.dh h2{font:800 1.6rem "Bricolage Grotesque",system-ui,sans-serif;margin:0 0 6px}
+.x-btn{border:1px solid var(--line);background:transparent;border-radius:10px;width:38px;height:38px;cursor:pointer;font-size:1.2rem}
+h3{font:700 1rem "Bricolage Grotesque",system-ui,sans-serif;margin:26px 0 10px}
+.journey{list-style:none;margin:0;padding:0}
+.journey li{position:relative;padding:0 0 20px 36px;color:var(--mute)}
+.journey li::before{content:"";position:absolute;left:9px;top:22px;bottom:-2px;width:2px;background:var(--line)}
+.journey li:last-child::before{display:none}
+.journey li::after{content:"";position:absolute;left:0;top:2px;width:20px;height:20px;border-radius:50%;border:2px solid var(--line);background:var(--surface)}
+.journey li.done,.journey li.now{color:var(--ink)}
+.journey li.done::after,.journey li.now::after{background:var(--c,var(--cobalt));border-color:var(--c,var(--cobalt))}
+.journey li.done::before{background:var(--cobalt)}
+.journey li.now::after{box-shadow:0 0 0 5px color-mix(in srgb,var(--c,var(--cobalt)) 22%,transparent)}
+.journey strong{display:block}.journey small{color:var(--mute)}
+.it{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.it small{color:var(--mute);display:block}
+.tot{display:flex;justify-content:space-between;font-weight:800;font-size:1.15rem;padding-top:12px}
+dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0}
+dt{color:var(--mute)}dd{margin:0}
+.acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
+.hint{color:var(--mute);font-size:.85rem;margin:8px 0 0}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:10px;opacity:0;pointer-events:none;transition:.25s;z-index:5}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:720px){.stats{grid-template-columns:1fr}.row{grid-template-columns:1fr auto;row-gap:8px}.c2{display:none}.c3{grid-column:1/-1;order:3}.chev{display:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <div><h1>Historial de pedidos</h1><p>Todo lo que has comprado y en qué punto va cada paquete.</p></div>
+  <label class="user">Usuario <input id="usuario" value="1" inputmode="numeric" aria-label="ID de usuario"></label>
+</div></header>
+<main class="wrap">
+  <section class="stats" id="stats" hidden aria-label="Resumen"></section>
+  <div class="tools">
+    <div class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" placeholder="Buscar por pedido o producto" aria-label="Buscar"></div>
+    <label>Desde <input id="desde" type="date"></label>
+    <label>Hasta <input id="hasta" type="date"></label>
+    <button class="btn ghost" id="nuevo" title="Crea un pedido de ejemplo para probar el servicio">Pedido de prueba</button>
+  </div>
+  <div class="chips" id="chips" role="group" aria-label="Filtrar por estado"></div>
+  <div id="list" aria-live="polite"></div>
+  <nav class="pag" id="pag" aria-label="Paginación"></nav>
+</main>
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dtitle">
+  <div class="dh"><div><h2 id="dtitle"></h2><span id="dstate"></span></div><button class="x-btn" id="close" aria-label="Cerrar detalle">&times;</button></div>
+  <div id="dbody"></div>
+</aside>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const FLOW=["pendiente","pagado","en_preparacion","enviado","entregado"];
+const ESTADOS=[...FLOW,"cancelado","devuelto"];
+const LABEL={pendiente:"Pendiente",pagado:"Pagado",en_preparacion:"En preparación",enviado:"Enviado",entregado:"Entregado",cancelado:"Cancelado",devuelto:"Devuelto"};
+const CATALOGO=[["SKU-001","Taza de barro",120],["SKU-002","Jarra artesanal",350],["SKU-003","Florero",210],["SKU-004","Plato hondo",85],["SKU-005","Cazuela",480]];
+const st={page:1,pages:1,estado:"",q:"",desde:"",hasta:"",usuario:"1",por:{}};
+const $=id=>document.getElementById(id);
+const h=(t,c,...k)=>{const e=document.createElement(t);if(c)e.className=c;k.flat().forEach(x=>{if(x!=null&&x!==false)e.append(x.nodeType?x:document.createTextNode(x))});return e};
+const money=n=>Number(n).toLocaleString("es-MX",{style:"currency",currency:"MXN"});
+const fd=f=>new Date(f).toLocaleDateString("es-MX",{day:"numeric",month:"short",year:"numeric"});
+const fdt=f=>new Date(f).toLocaleString("es-MX",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+const badge=e=>h("span","badge s-"+e,LABEL[e]||e);
+async function api(path,opts){const r=await fetch(path,opts);const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"Error "+r.status);return d}
+const send=(m,path,body)=>api(path,{method:m,headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+let tt;function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("show"),2600)}
+function chev(){const s=h("span","chev");s.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>';return s}
+
+function renderStats(r){
+  const box=$("stats");box.replaceChildren();
+  if(!r){box.hidden=true;return}
+  box.hidden=false;
+  const left=h("div",null,h("small",null,"Total gastado"),h("div","big",money(r.total_gastado)),h("small",null,r.pedidos+(r.pedidos==1?" pedido":" pedidos")+" en total"));
+  const bar=h("div","bar"),leg=h("div","legend");
+  ESTADOS.filter(e=>r.por_estado[e]).forEach(e=>{
+    const s=h("span","s-"+e);s.style.flex=r.por_estado[e];s.title=LABEL[e]+": "+r.por_estado[e];bar.append(s);
+    leg.append(h("span","s-"+e,h("i"),LABEL[e]+" "+r.por_estado[e]));
+  });
+  box.append(left,h("div",null,bar,leg));
+}
+function renderChips(){
+  const c=$("chips");c.replaceChildren();
+  const total=Object.values(st.por).reduce((a,b)=>a+b,0);
+  const mk=(val,label,n)=>{const b=h("button","chip",label,n!=null?h("b",null,n):null);b.setAttribute("aria-pressed",st.estado===val);b.onclick=()=>{st.estado=val;st.page=1;load()};c.append(b)};
+  mk("","Todos",st.usuario?total:null);
+  ESTADOS.forEach(e=>{if(!st.usuario||st.por[e]||st.estado===e)mk(e,LABEL[e],st.usuario?(st.por[e]||0):null)});
+}
+function row(o){
+  const idx=FLOW.indexOf(o.estado);
+  const prog=h("span","prog s-"+o.estado+(idx<0?" x":""),FLOW.map((_,i)=>h("i",i<=idx?"on":"")));
+  const b=h("button","row",
+    h("span","c1",h("b",null,o.id),h("small",null,fd(o.fecha))),
+    h("span","c2",o.n_items+(o.n_items==1?" artículo":" artículos")),
+    h("span","c3",prog,badge(o.estado)),
+    h("span","c4",money(o.total)),chev());
+  b.onclick=()=>openOrder(o.id,b);return b;
+}
+function renderList(d){
+  const box=$("list");box.replaceChildren();
+  if(!d.pedidos.length){
+    const filtros=st.estado||st.q||st.desde||st.hasta;
+    const e=h("div","empty",h("p",null,filtros?"Ningún pedido coincide con estos filtros.":"Este usuario todavía no tiene pedidos."));
+    if(filtros){const b=h("button","btn","Quitar filtros");b.onclick=reset;e.append(b)}
+    box.append(e);
+  }else d.pedidos.forEach(o=>box.append(row(o)));
+  st.pages=Math.max(1,Math.ceil(d.total/d.limit));
+  const p=$("pag");p.replaceChildren();
+  if(st.pages>1){
+    const a=h("button","btn ghost","Anterior"),n=h("button","btn ghost","Siguiente");
+    a.disabled=st.page<=1;n.disabled=st.page>=st.pages;
+    a.onclick=()=>{st.page--;load()};n.onclick=()=>{st.page++;load()};
+    p.append(a,h("span",null,"Página "+st.page+" de "+st.pages),n);
+  }
+}
+async function load(){
+  const box=$("list");box.replaceChildren(...[1,2,3,4].map(()=>h("div","sk")));
+  const p=new URLSearchParams({page:st.page,limit:8});
+  if(st.usuario)p.set("usuario_id",st.usuario);
+  ["estado","q","desde","hasta"].forEach(k=>{if(st[k])p.set(k,st[k])});
+  try{
+    const [d,r]=await Promise.all([api("/api/historial?"+p),st.usuario?api("/api/historial/resumen?usuario_id="+encodeURIComponent(st.usuario)):null]);
+    st.por=r?r.por_estado:{};
+    renderStats(r);renderChips();renderList(d);
+  }catch(e){
+    box.replaceChildren();
+    const b=h("button","btn","Reintentar");b.onclick=load;
+    box.append(h("div","empty",h("p",null,"No se pudo cargar el historial: "+e.message+". Revisa que el servicio esté corriendo."),b));
+  }
+}
+function reset(){st.estado=st.q=st.desde=st.hasta="";st.page=1;$("q").value=$("desde").value=$("hasta").value="";load()}
+
+let lastTrigger=null;
+async function openOrder(id,trigger){
+  if(trigger)lastTrigger=trigger;
+  try{const d=await api("/api/historial/"+encodeURIComponent(id));renderDrawer(d);
+    document.body.classList.add("open");$("close").focus();
+  }catch(e){toast(e.message)}
+}
+function closeDrawer(){document.body.classList.remove("open");if(lastTrigger&&document.contains(lastTrigger))lastTrigger.focus()}
+function renderDrawer(d){
+  $("dtitle").textContent=d.id;$("dstate").replaceChildren(badge(d.estado));
+  const body=$("dbody");body.replaceChildren();
+  const ev=s=>[...d.eventos].reverse().find(e=>e.estado===s);
+  const reached=Math.max(FLOW.indexOf(d.estado),...d.eventos.map(e=>FLOW.indexOf(e.estado)));
+  const ol=h("ol","journey");
+  FLOW.forEach((s,i)=>{
+    const e=ev(s),bad=d.estado==="cancelado"||d.estado==="devuelto";
+    const cls=i<reached||(i===reached&&bad)?"done":i===reached?"now s-"+s:"";
+    ol.append(h("li",(cls||"todo")+(i===4&&i===reached&&!bad?" s-entregado":""),h("strong",null,LABEL[s]),e?h("small",null,fdt(e.fecha)):null));
+  });
+  if(d.estado==="cancelado"||d.estado==="devuelto"){const e=ev(d.estado);ol.append(h("li","now s-"+d.estado,h("strong",null,LABEL[d.estado]),e?h("small",null,fdt(e.fecha)):null))}
+  body.append(h("h3",null,"Recorrido del pedido"),ol,h("h3",null,"Productos"));
+  d.items.forEach(i=>body.append(h("div","it",h("div",null,i.cantidad+" × "+(i.nombre||i.sku),h("small",null,i.sku+" · "+money(i.precio_unitario)+" c/u")),h("b",null,money(i.cantidad*i.precio_unitario)))));
+  body.append(h("div","tot",h("span",null,"Total"),h("span",null,money(d.total))),h("h3",null,"Datos del pedido"),
+    h("dl",null,h("dt",null,"Fecha"),h("dd",null,fdt(d.fecha)),h("dt",null,"Envío"),h("dd",null,d.direccion_envio||"—"),h("dt",null,"Pago"),h("dd",null,d.metodo_pago||"—"),h("dt",null,"Guía"),h("dd",null,d.tracking||"—")));
+  const acts=h("div","acts"),cp=h("button","btn ghost","Copiar número");
+  cp.onclick=()=>{(navigator.clipboard?navigator.clipboard.writeText(d.id):Promise.reject()).then(()=>toast("Número copiado"),()=>toast(d.id))};
+  acts.append(cp);
+  const i=FLOW.indexOf(d.estado);
+  if(i>=0&&i<4){
+    const nx=FLOW[i+1],ad=h("button","btn","Marcar como "+LABEL[nx].toLowerCase());
+    ad.onclick=async()=>{ad.disabled=true;try{const body=nx==="enviado"?{estado:nx,tracking:"GUIA"+Date.now().toString().slice(-8)}:{estado:nx};
+      const nd=await send("PUT","/api/historial/"+encodeURIComponent(d.id)+"/estado",body);renderDrawer(nd);toast("Pedido "+LABEL[nx].toLowerCase());load()}catch(e){toast(e.message);ad.disabled=false}};
+    acts.append(ad);body.append(acts,h("p","hint","Simula el aviso que enviaría el servicio de Seguimiento."));
+  }else body.append(acts);
+}
+
+$("close").onclick=closeDrawer;$("scrim").onclick=closeDrawer;
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer()});
+$("usuario").onchange=e=>{st.usuario=e.target.value.trim();st.estado="";st.page=1;load()};
+let deb;$("q").oninput=e=>{clearTimeout(deb);deb=setTimeout(()=>{st.q=e.target.value.trim();st.page=1;load()},300)};
+$("desde").onchange=e=>{st.desde=e.target.value;st.page=1;load()};
+$("hasta").onchange=e=>{st.hasta=e.target.value;st.page=1;load()};
+$("nuevo").onclick=async()=>{
+  const b=$("nuevo");b.disabled=true;
+  const items=CATALOGO.sort(()=>Math.random()-.5).slice(0,1+Math.floor(Math.random()*3)).map(([sku,nombre,p])=>({sku,nombre,cantidad:1+Math.floor(Math.random()*3),precio_unitario:p}));
+  try{const o=await send("POST","/api/historial",{id:"PED-"+Date.now().toString().slice(-6),usuario_id:st.usuario||"1",direccion_envio:"Domicilio de prueba",metodo_pago:"tarjeta",items});
+    toast("Pedido "+o.id+" creado");st.page=1;load()}catch(e){toast(e.message)}finally{b.disabled=false}
+};
+load();
+</script>
+</body>
+</html>
